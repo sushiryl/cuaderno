@@ -1,0 +1,13 @@
+{
+  "files": {
+    "main.css": "/cuaderno/static/css/main.c8072d42.css",
+    "main.js": "/cuaderno/static/js/main.b07f07bb.js",
+    "index.html": "/cuaderno/index.html",
+    "main.c8072d42.css.map": "/cuaderno/static/css/main.c8072d42.css.map",
+    "main.b07f07bb.js.map": "/cuaderno/static/js/main.b07f07bb.js.map"
+  },
+  "entrypoints": [
+    "static/css/main.c8072d42.css",
+    "static/js/main.b07f07bb.js"
+  ]
+}
