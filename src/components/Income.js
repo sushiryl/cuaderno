@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { db } from "./firebaseConfig";
 import { collection, addDoc } from "firebase/firestore";
 
@@ -6,8 +6,25 @@ const Income = ({ onSubmit, onBack }) => {
   const [incomeForm, setIncomeForm] = useState({
     date: "",
     clientName: "",
-    products: [{ name: "", price: "" }],
+    products: [{ name: "", quantity: 1, price: "", subtotal: 0 }],
+    total: 0
   });
+
+  // Calculate subtotals and total whenever products change
+  useEffect(() => {
+    const updatedProducts = incomeForm.products.map(product => ({
+      ...product,
+      subtotal: (parseFloat(product.quantity) || 0) * (parseFloat(product.price) || 0)
+    }));
+
+    const total = updatedProducts.reduce((sum, product) => sum + product.subtotal, 0);
+
+    setIncomeForm(prev => ({
+      ...prev,
+      products: updatedProducts,
+      total
+    }));
+  }, [incomeForm.products.map(p => `${p.quantity}-${p.price}`).join(',')]);
 
   const handleIncomeSubmit = async () => {
     if (!incomeForm.date || !incomeForm.clientName || incomeForm.products.some(p => !p.name || !p.price)) {
@@ -15,21 +32,26 @@ const Income = ({ onSubmit, onBack }) => {
       return;
     }
 
-    const total = incomeForm.products.reduce((sum, p) => sum + parseFloat(p.price || 0), 0);
     const formattedDate = new Date(incomeForm.date).toISOString().split("T")[0];
 
     try {
       await addDoc(collection(db, "ingresos"), {
         date: formattedDate,
         clientName: incomeForm.clientName,
-        products: incomeForm.products,
-        total,
+        products: incomeForm.products.map(p => ({
+          ...p,
+          quantity: parseInt(p.quantity),
+          price: parseFloat(p.price),
+          subtotal: p.subtotal
+        })),
+        total: incomeForm.total
       });
       alert("Ingreso guardado en Firebase 🎉");
       setIncomeForm({ 
-        date: "", 
+        date: formattedDate,
         clientName: "",
-        products: [{ name: "", price: "" }] 
+        products: [{ name: "", quantity: 1, price: "", subtotal: 0 }],
+        total: 0
       });
     } catch (error) {
       console.error("Error al guardar en Firebase:", error);
@@ -39,7 +61,7 @@ const Income = ({ onSubmit, onBack }) => {
   const addProduct = () => {
     setIncomeForm({
       ...incomeForm,
-      products: [...incomeForm.products, { name: "", price: "" }]
+      products: [...incomeForm.products, { name: "", quantity: 1, price: "", subtotal: 0 }]
     });
   };
 
@@ -55,7 +77,7 @@ const Income = ({ onSubmit, onBack }) => {
 
   return (
     <div className="container">
-      <h2>Registrar Ganancias</h2>
+      <h2>Registrar Ventas</h2>
 
       <div className="form-group">
         <label>Fecha:</label>
@@ -90,6 +112,17 @@ const Income = ({ onSubmit, onBack }) => {
           />
           <input
             type="number"
+            placeholder="Cantidad"
+            min="1"
+            value={product.quantity}
+            onChange={(e) => {
+              const newProducts = [...incomeForm.products];
+              newProducts[index].quantity = e.target.value;
+              setIncomeForm({ ...incomeForm, products: newProducts });
+            }}
+          />
+          <input
+            type="number"
             placeholder="Precio"
             value={product.price}
             onChange={(e) => {
@@ -98,6 +131,9 @@ const Income = ({ onSubmit, onBack }) => {
               setIncomeForm({ ...incomeForm, products: newProducts });
             }}
           />
+          <div className="subtotal">
+            ${product.subtotal.toFixed(2)}
+          </div>
           {incomeForm.products.length > 1 && (
             <button 
               onClick={() => removeProduct(index)}
@@ -108,6 +144,10 @@ const Income = ({ onSubmit, onBack }) => {
           )}
         </div>
       ))}
+
+      <div className="total">
+        Total: ${incomeForm.total.toFixed(2)}
+      </div>
 
       <button onClick={addProduct} className="add-button">
         + Agregar Producto
@@ -125,7 +165,7 @@ const Income = ({ onSubmit, onBack }) => {
       <style jsx>{`
         .container {
           padding: 20px;
-          max-width: 600px;
+          max-width: 800px;
           margin: 0 auto;
         }
 
@@ -149,7 +189,6 @@ const Income = ({ onSubmit, onBack }) => {
           padding: 8px;
           border: 1px solid #ddd;
           border-radius: 4px;
-          width: 100%;
         }
 
         .product-row input[type="text"] {
@@ -158,6 +197,19 @@ const Income = ({ onSubmit, onBack }) => {
 
         .product-row input[type="number"] {
           flex: 1;
+        }
+
+        .subtotal {
+          min-width: 100px;
+          text-align: right;
+          font-weight: bold;
+        }
+
+        .total {
+          margin: 20px 0;
+          text-align: right;
+          font-size: 1.2em;
+          font-weight: bold;
         }
 
         .remove-button {
