@@ -1,13 +1,13 @@
 {
   "files": {
     "main.css": "/cuaderno/static/css/main.c8072d42.css",
-    "main.js": "/cuaderno/static/js/main.b07f07bb.js",
+    "main.js": "/cuaderno/static/js/main.6484c08c.js",
     "index.html": "/cuaderno/index.html",
     "main.c8072d42.css.map": "/cuaderno/static/css/main.c8072d42.css.map",
-    "main.b07f07bb.js.map": "/cuaderno/static/js/main.b07f07bb.js.map"
+    "main.6484c08c.js.map": "/cuaderno/static/js/main.6484c08c.js.map"
   },
   "entrypoints": [
     "static/css/main.c8072d42.css",
-    "static/js/main.b07f07bb.js"
+    "static/js/main.6484c08c.js"
   ]
 }
