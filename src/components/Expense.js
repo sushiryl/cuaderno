@@ -25,7 +25,7 @@ const Expense = ({ onSubmit, onBack }) => {
       });
       alert("Gasto guardado en Firebase 🎉");
       setExpenseForm({ 
-        date: "", 
+        date: formattedDate, 
         products: [{ name: "", price: "" }] 
       });
     } catch (error) {
